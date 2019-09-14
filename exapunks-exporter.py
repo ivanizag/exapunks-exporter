@@ -19,7 +19,8 @@ def getString(f):
 
 def getFlag(f):
     byte = f.read(1)
-    return byte != 0
+    return byte != b'\x00'
+
 
 scoreNames = {0: 'cycles', 1: 'size', 2: 'activity'}
 def getScore(f):
@@ -39,7 +40,7 @@ def getExa(f):
     exa['name'] = getString(f)
     exa['source'] = getString(f)
     exa['collapsed'] = getFlag(f)
-    exa['global'] = getFlag(f)
+    exa['local'] = getFlag(f)
     exa['bitmap'] = [getFlag(f) for _ in range(100)]
     del exa['bitmap']
     return exa
@@ -66,7 +67,7 @@ def saveExaFile(file_info):
         for exa in file_info['exas']:
             f.write(f"""
 ;; Exa name: {exa['name']}
-;; Global: {exa['global']}
+;; Local: {exa['local']}
 {exa['source']}""")
     
 def processFile(folder, filename):
