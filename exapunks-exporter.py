@@ -93,8 +93,8 @@ def processFolder(folder):
 
 
 if len(sys.argv) != 2 :
-    print("Usage: python3 expunks-exporter sourcefolder")
-    print("Example: python3 exapunks-exporter ~/.local/share/EXAPUNKS/1234123412341234")
+    print("Usage: python3 expunks-exporter.py sourcefolder")
+    print("Example: python3 exapunks-exporter.py ~/.local/share/EXAPUNKS/1234123412341234")
 
 processFolder(sys.argv[1])
 
