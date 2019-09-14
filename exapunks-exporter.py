@@ -33,6 +33,15 @@ def getScore(f):
         score[type] = getInt32(f)
     return score
 
+def printBitmap(bitmap):
+    for i in range(10):
+        for j in range(10):
+            if bitmap[i*10 + j]:
+                print("#", end='')
+            else:
+                print(" ", end='')
+        print()
+
 def getExa(f):
     exa = {}
     exa['lead'] = getByte(f)
@@ -69,8 +78,32 @@ def saveExaFile(file_info):
 ;; Exa name: {exa['name']}
 ;; Local: {exa['local']}
 {exa['source']}""")
+
+def saveScores(scores):
+    filename = "top-scores.txt"
+    if os.path.exists(filename):
+        os.remove(filename)
+    with open(filename, mode="w") as f:
+        f.write("Level-name: cycles, size, activity\n")
+        for level, data in sorted(scores.items()):
+            if 'cycles' in data and 'size' in data and 'activity' in data:
+                f.write(f"{level}: {data['cycles']}, {data['size']}, {data['activity']}\n")
+
+def updateTopScores(file_info, scores):
+    if file_info['wins'] > 0:
+        return
+
+    level = file_info["level_id"].lower() + "-" + file_info["level_name"]
+    data = {}
+    if level in scores:
+        data = scores[level]
+    for s in ['cycles', 'size', 'activity']:
+        if s in file_info['score']:
+            if s not in data or file_info['score'][s] < data[s]:
+                data[s] = file_info['score'][s]
+    scores[level] = data
     
-def processFile(folder, filename):
+def processFile(folder, filename, scores):
     file_info = {}
     with open(os.path.join(folder, filename), mode='rb') as f:
         level, _ = os.path.splitext(filename)
@@ -84,14 +117,16 @@ def processFile(folder, filename):
         file_info['score'] = getScore(f)
         file_info['exas'] = getExas(f)
         file_info['rest'] = f.read(-1)
+    updateTopScores(file_info, scores)
     saveExaFile(file_info)
 
 def processFolder(folder):
+    scores = {}
     for filename in os.listdir(folder):
         _, extension = os.path.splitext(filename)
         if extension == ".solution":
-            processFile(folder, filename)
-
+            processFile(folder, filename, scores)
+    saveScores(scores)
 
 if len(sys.argv) != 2 :
     print("Usage: python3 expunks-exporter.py sourcefolder")
